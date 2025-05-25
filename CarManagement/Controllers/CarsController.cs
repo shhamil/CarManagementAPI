@@ -46,6 +46,19 @@ namespace CarManagement.Controllers
             if (!await _context.CarFactories.AnyAsync(f => f.id == createDto.CarFactoryId))
                 return BadRequest("Factory not found");
 
+            bool exists = await _context.Cars
+            .AnyAsync(c => c.name.ToLower() == createDto.Name.ToLower()
+                    && c.type.ToLower() == createDto.Type.ToLower()
+                    && c.carfactoryid == createDto.CarFactoryId);
+
+            if (exists)
+            {
+                return Conflict(new
+                {
+                    Message = "A car with such characteristics already exists from this manufacturer."
+                });
+            }
+
             var car = new Car
             {
                 name = createDto.Name,

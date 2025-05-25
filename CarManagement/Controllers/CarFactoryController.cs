@@ -39,6 +39,18 @@ namespace CarManagement.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            bool exists = await _context.CarFactories
+                .AnyAsync(f => f.name.ToLower() == createDto.Name.ToLower()
+                             && f.country.ToLower() == createDto.Country.ToLower());
+
+            if (exists)
+            {
+                return Conflict(new
+                {
+                    Message = "A manufacturer with the same name and country already exists"
+                });
+            }
+
             var factory = new CarFactory
             {
                 name = createDto.Name,

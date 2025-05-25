@@ -23,21 +23,25 @@ using (var scope = app.Services.CreateScope())
         }
 
         await db.Database.ExecuteSqlRawAsync(@"
-            CREATE TABLE IF NOT EXISTS CarFactories (
-                Id SERIAL PRIMARY KEY,
-                Name VARCHAR(100) NOT NULL,
-                Country VARCHAR(100)
-            )");
+        CREATE TABLE IF NOT EXISTS CarFactories (
+            Id SERIAL PRIMARY KEY,
+            Name VARCHAR(100) NOT NULL,
+            Country VARCHAR(100),
+            CONSTRAINT uq_factory_name_country UNIQUE (Name, Country)
+        )");
 
         await db.Database.ExecuteSqlRawAsync(@"
-            CREATE TABLE IF NOT EXISTS Cars (
-                Id SERIAL PRIMARY KEY,
-                CarFactoryId INTEGER NOT NULL,
-                Name VARCHAR(100) NOT NULL,
-                Type VARCHAR(50),
-                CONSTRAINT fk_carfactory FOREIGN KEY (CarFactoryId) 
-                REFERENCES CarFactories(Id) ON DELETE CASCADE
-            )");
+        CREATE TABLE IF NOT EXISTS Cars (
+            Id SERIAL PRIMARY KEY,
+            CarFactoryId INTEGER NOT NULL,
+            Name VARCHAR(100) NOT NULL,
+            Type VARCHAR(50),
+            CONSTRAINT fk_carfactory FOREIGN KEY (CarFactoryId) 
+            REFERENCES CarFactories(Id) ON DELETE CASCADE
+        );
+        
+        CREATE UNIQUE INDEX idx_car_name_type_factory_ci 
+        ON Cars (LOWER(Name), LOWER(Type), CarFactoryId);");
 
     }
     catch (Exception ex)
